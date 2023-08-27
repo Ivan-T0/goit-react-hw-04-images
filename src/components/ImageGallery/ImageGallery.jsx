@@ -22,21 +22,7 @@ const STATUS = {
   const [status, setStatus] = useState(STATUS.IDLE);
   const [showModal, setShowModal] = useState(false);
 
-   
-
-  useEffect(() => {
- 
-
-  if (props.query !== "") {
-    setImages([]);
-    setPage(1);
-    setStatus(STATUS.PENDING);
-    fetchImages();
-  }
-  }, [props.query]);
-   
-   
-    const fetchImages = async () => {
+     const fetchImages = async () => {
     try {
       const response = await getImages({
         searchQuery: props.query,
@@ -50,6 +36,20 @@ const STATUS = {
       setErrorMessage("Error loading images");
     }
   };
+   
+   
+
+  useEffect(() => {
+ 
+
+  if (props.query !== "") {
+    setImages([]);
+    setPage(1);
+    setStatus(STATUS.PENDING);
+    fetchImages();
+  }
+  }, [props.query])
+   
    
   
 
@@ -84,9 +84,9 @@ const STATUS = {
         <div>
           {images.length > 0 ? (
             <div>
-                          <ul className={cl.gallery}>
-                {images.map((image) => (
-                    <li key={image.id} className={cl.gallery_item}>
+                          <ul  className={cl.gallery}>
+                {images.map((image,index) => (
+                    <li key={index} className={cl.gallery_item}>
                     <img
                       src={image.webformatURL}
                       alt={image.id}
