@@ -22,42 +22,35 @@ const STATUS = {
   const [status, setStatus] = useState(STATUS.IDLE);
   const [showModal, setShowModal] = useState(false);
 
-     const fetchImages = async () => {
-    try {
-      const response = await getImages({
-        searchQuery: props.query,
-        page: page,
-        per_page: per_page,
-      });
-      setImages(prevImages => [...prevImages, ...response.hits]);
-      setStatus(STATUS.RESOLVED);
-    } catch (error) {
-      console.error(error);
-      setErrorMessage("Error loading images");
-    }
-  };
-   
-   
+   const fetchImages = async () => {
+  try {
+    const response = await getImages({
+      searchQuery: props.query,
+      page: page,
+      per_page: per_page,
+    });
+    setImages(prevImages => [...prevImages, ...response.hits]);
+    setStatus(STATUS.RESOLVED);
+  } catch (error) {
+    console.error(error);
+    setErrorMessage("Error loading images");
+  }
+};
 
-  useEffect(() => {
- 
-
+useEffect(() => {
   if (props.query !== "") {
     setImages([]);
     setPage(1);
     setStatus(STATUS.PENDING);
     fetchImages();
   }
-  }, [props.query])
-   
-   
-  
+}, [props.query, page, per_page]);
 
-  const handleLoadMore = () => {
-    setPage(prevPage => prevPage + 1);
-    setStatus(STATUS.PENDING);
-    fetchImages();
-  };
+const handleLoadMore = () => {
+  setPage(prevPage => prevPage + 1);
+  setStatus(STATUS.PENDING);
+  fetchImages();
+};
 
  
   const handleImageClick = (imageURL) => {
