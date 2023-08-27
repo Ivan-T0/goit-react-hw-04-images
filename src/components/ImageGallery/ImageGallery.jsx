@@ -1,4 +1,4 @@
-import React, {  useEffect, useState } from "react";
+import React, {  useEffect, useState, useCallback } from "react";
 import Button from "../Button/Button";
 import getImages from '../../api/SearchImages'
 import Loader from "components/Loader/Loader";
@@ -13,46 +13,48 @@ const STATUS = {
   REJECTED: "rejected",
 };
 
- const ImageGallery=(props)=> {
+ const ImageGallery = (props) => {
   const [images, setImages] = useState([]);
   const [page, setPage] = useState(1);
   const [per_page] = useState(12);
   const [modalImageUrl, setModalImageUrl] = useState('');
-  const [ , setErrorMessage] = useState(null);
+  const [, setErrorMessage] = useState(null);
   const [status, setStatus] = useState(STATUS.IDLE);
   const [showModal, setShowModal] = useState(false);
 
-   const fetchImages = async () => {
-  try {
-    const response = await getImages({
-      searchQuery: props.query,
-      page: page,
-      per_page: per_page,
-    });
-    setImages(prevImages => [...prevImages, ...response.hits]);
-    setStatus(STATUS.RESOLVED);
-  } catch (error) {
-    console.error(error);
-    setErrorMessage("Error loading images");
-  }
-};
+   const fetchImages = useCallback(async () => {
+    try {
+      const response = await getImages({
+        searchQuery: props.query,
+        page: page,
+        per_page: per_page,
+      });
+      setImages((prevImages) => [...prevImages, ...response.hits]);
+      setStatus(STATUS.RESOLVED);
+    } catch (error) {
+      console.error(error);
+      setErrorMessage("Error loading images");
+    }
+  }, [props.query, page, per_page]);
 
-useEffect(() => {
-  if (props.query !== "") {
-    setImages([]);
-    setPage(1);
+  useEffect(() => {
+    const fetchAndSetImages = async () => {
+      if (props.query !== "") {
+        setImages([]);
+        setPage(1);
+        setStatus(STATUS.PENDING);
+        await fetchImages();
+      }
+    };
+    fetchAndSetImages();
+  }, [props.query, fetchImages]);
+
+  const handleLoadMore = async () => {
+    setPage((prevPage) => prevPage + 1);
     setStatus(STATUS.PENDING);
-    fetchImages();
-  }
-}, [props.query, page, per_page]);
+    await fetchImages();
+  };
 
-const handleLoadMore = () => {
-  setPage(prevPage => prevPage + 1);
-  setStatus(STATUS.PENDING);
-  fetchImages();
-};
-
- 
   const handleImageClick = (imageURL) => {
     setModalImageUrl(imageURL);
     setShowModal(true);
@@ -63,8 +65,6 @@ const handleLoadMore = () => {
     setShowModal(false);
   };
 
-  
-  
   const showLoadMoreButton = images.length > 0;
 
   if (status === STATUS.PENDING) {
@@ -77,9 +77,9 @@ const handleLoadMore = () => {
         <div>
           {images.length > 0 ? (
             <div>
-                          <ul  className={cl.gallery}>
-                {images.map((image,index) => (
-                    <li key={index} className={cl.gallery_item}>
+              <ul className={cl.gallery}>
+                {images.map((image, index) => (
+                  <li key={index} className={cl.gallery_item}>
                     <img
                       src={image.webformatURL}
                       alt={image.id}
@@ -100,7 +100,6 @@ const handleLoadMore = () => {
       )}
     </div>
   );
-
-}
+};
 
 export default ImageGallery
