@@ -26,7 +26,7 @@ const Modal = (props)=> {
     return (
       <div className={cl.modal}>
         <div className={cl.modal_backdrop} onClick={handleBackdropClick}>
-          <img src={imageUrl} alt="Large"  />
+          <img src={imageUrl} alt="Large" className={cl.modal_image} />
         </div>
       </div>
     );
